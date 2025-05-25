@@ -37,7 +37,7 @@ resource "azapi_resource_action" "export_terraform_simple" {
 
   body = {
     type           = "ExportResource"
-    resourceName   = "resource${count.index}" # TODO: revisit this based on number of resources
+    resourceName   = "resource${count.index}"
     fullProperties = false # we want as close to valid tf as possible
     targetProvider = var.target_provider
     maskSensitive  = var.mask_sensitive_arguments
