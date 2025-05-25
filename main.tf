@@ -37,9 +37,10 @@ resource "azapi_resource_action" "export_terraform_simple" {
 
   body = {
     type           = "ExportResource"
-    targetProvider = "azurerm"
     resourceName   = "resource${count.index}" # TODO: revisit this based on number of resources
-    maskSensitive  = false
+    fullProperties = false # we want as close to valid tf as possible
+    targetProvider = var.target_provider
+    maskSensitive  = var.mask_sensitive_arguments
     resourceIds = [
       local.resources[count.index].id
     ]
