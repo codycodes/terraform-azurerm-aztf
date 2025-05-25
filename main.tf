@@ -47,11 +47,27 @@ resource "azapi_resource_action" "export_terraform_simple" {
   response_export_values = ["*"]
 }
 
+locals {
+  tf_block_replace = <<-EOT
+  terraform {
+    required_providers {
+      azurerm = {
+        source  = "azurerm"
+        version = "${var.azurerm_export_terraform_verison}"
+      }
+    }
+  }
+  provider "azurerm" {
+    features {}
+  }
+  EOT
+}
+
 resource "local_file" "exported_terraform" {
   count = length(local.resources)
 
   filename = "./generated-resources/${count.index}-${local.resources[count.index].name}.tf"
-  content  = azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration
+  content  = replace(azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration, local.tf_block_replace, "")
 }
 
 resource "local_file" "exported_terraform_debug" {
@@ -59,7 +75,7 @@ resource "local_file" "exported_terraform_debug" {
 
   filename = "./debug/${count.index}-${local.resources[count.index].name}.tf"
   # values cannot result to null in string templates
-  content = <<-EOT
+  content = <<EOT
   errors: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.errors == null ? "" : azapi_resource_action.export_terraform_simple[count.index].output.properties.errors}
   skipped resources: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources == null ? "" : azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources}
   EOT
