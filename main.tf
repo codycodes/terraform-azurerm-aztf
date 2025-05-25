@@ -70,6 +70,7 @@ resource "local_file" "exported_terraform" {
   content  = replace(azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration, local.tf_block_replace, "")
 }
 
+# generate single import file for resources
 resource "local_file" "exported_terraform_import" {
   filename = "./generated-resources/imported.tf"
   content  = join("\n", [for i, v in local.resources : azapi_resource_action.export_terraform_simple[i].output.properties.import])
