@@ -38,3 +38,5 @@ terraform.rc
 
 # Ignore Azure Resources stored in files
 **/azure-resources.yaml
+/generated-resources/**
+/debugs/**
