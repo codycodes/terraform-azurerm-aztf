@@ -81,7 +81,7 @@ resource "local_file" "exported_terraform_import" {
 resource "local_file" "exported_terraform_debug" {
   count = length(local.resources)
 
-  filename = "./debug/${count.index}-${local.resources[count.index].name}.tf"
+  filename = "./debug/${count.index}-${local.resources[count.index].name}.txt"
   # values cannot result to null in string templates
   content = <<EOT
   errors: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.errors == null ? "" : azapi_resource_action.export_terraform_simple[count.index].output.properties.errors}
