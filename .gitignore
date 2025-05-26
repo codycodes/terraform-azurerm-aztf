@@ -64,5 +64,5 @@ terraform.rc
 # Ignore Azure Resources stored in files
 **/azure-resources.yaml
 /generated-resources/**
-debugExportTerraform.txt
+exportTerraformSkippedResourcesAndErrors.log
 .vscode/settings.json
