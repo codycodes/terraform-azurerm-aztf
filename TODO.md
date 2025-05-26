@@ -1,5 +1,6 @@
 # TODO: only generate debug files if there's an error
 # TODO: capture error and notify
+# TODO: refactor to use for-each rather than count
 # TODO: generate a providers.tf and main.tf
 # TODO: provide instructions on what to do after import - remove sensitive values if needed, etc.
 # TODO: for custom naming of resources generated?  # TODO: revisit this based on number of resources
