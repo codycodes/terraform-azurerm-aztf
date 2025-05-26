@@ -11,19 +11,27 @@ terraform {
 }
 
 # fetch all the resources in the subscription
-resource "null_resource" "export_azure_resources_yaml" {
-  provisioner "local-exec" {
-    command = "az resource list --output yaml > azure-resources.yaml"
+resource "azapi_resource_action" "fetch_resources" {
+  type        = "Microsoft.ResourceGraph@2024-04-01"
+  resource_id = "/providers/Microsoft.ResourceGraph"
+  method      = "POST"
+  action      = "resources"
+
+  body = {
+    query         = "resources"
+    subscriptions = [var.subscription_id]
   }
+
+  response_export_values = ["*"]
 }
 
-data "local_file" "azure_resources" {
-  depends_on = [null_resource.export_azure_resources_yaml]
-  filename   = "./azure-resources.yaml"
+resource "local_file" "azure_resources" {
+  filename = "./azure-resources.yaml"
+  content  = yamlencode([for resource in azapi_resource_action.fetch_resources.output.data : { name = resource.name, id = resource.id }])
 }
 
 locals {
-  resources = yamldecode(data.local_file.azure_resources.content)
+  resources = yamldecode(local_file.azure_resources.content)
 }
 
 # generate terraform for each resource using count and save to files
