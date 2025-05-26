@@ -9,6 +9,12 @@ variable "azurerm_export_terraform_verison" {
   default     = "4.24.0"
 }
 
+variable "resource_ids_to_skip" {
+  type        = list(string)
+  description = "List of resource IDs to skip. Can be run after resource IDs are fetched to file"
+  default     = []
+}
+
 # the following are opinionated variables for the module that can be overriddencheck
 variable "mask_sensitive_arguments" {
   type        = bool

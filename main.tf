@@ -75,7 +75,12 @@ locals {
 }
 
 resource "local_file" "exported_terraform" {
-  for_each = tomap({ for i, resource in azapi_resource_action.export_terraform : i => resource if can(resource.output.properties.configuration) })
+  for_each = tomap(
+    {
+      for i, resource in azapi_resource_action.export_terraform : i => resource
+      if can(resource.output.properties.configuration) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds))
+    }
+  )
 
   filename = "./generated-resources/${each.key}-${local.resource_map[each.key].name}.tf"
   content  = replace(each.value.output.properties.configuration, local.tf_block_replace, "")
@@ -102,6 +107,6 @@ locals {
 resource "local_file" "exported_terraform_debug" {
   count = length(local.debug_resources) >= 1 ? 1 : 0
 
-  filename = "./debugExportTerraform.txt"
+  filename = "./exportTerraformSkippedResourcesAndErrors.log"
   content  = yamlencode(local.debug_resources)
 }
