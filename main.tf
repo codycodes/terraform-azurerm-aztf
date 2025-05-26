@@ -74,6 +74,9 @@ locals {
   EOT
 }
 
+# NOTE: if these files are edited outside of Terraform, you may want to consider removing them from state
+#       using a removed block with destroy set to false
+#       please track the following issue for updates: https://github.com/hashicorp/terraform-provider-local/issues/262
 resource "local_file" "exported_terraform" {
   for_each = tomap(
     {
@@ -84,6 +87,11 @@ resource "local_file" "exported_terraform" {
 
   filename = "./generated-resources/${each.key}-${local.resource_map[each.key].name}.tf"
   content  = replace(each.value.output.properties.configuration, local.tf_block_replace, "")
+
+  lifecycle {
+    # currently this option is not respected (changes are not ignored if file is updated)
+    ignore_changes = [content]
+  }
 }
 
 # generate single import file for resources
