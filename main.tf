@@ -31,12 +31,13 @@ resource "local_file" "azure_resources" {
 }
 
 locals {
-  resources = yamldecode(local_file.azure_resources.content)
+  resources    = yamldecode(local_file.azure_resources.content)
+  resource_map = tomap({ for i, v in local.resources : i => v })
 }
 
-# generate terraform for each resource using count and save to files
+# generate terraform for each resource and save to file
 resource "azapi_resource_action" "export_terraform_simple" {
-  count = length(local.resources)
+  for_each = local.resource_map
 
   type        = "Microsoft.AzureTerraform@2023-07-01-preview"
   resource_id = "/subscriptions/${var.subscription_id}/providers/Microsoft.AzureTerraform"
@@ -45,12 +46,12 @@ resource "azapi_resource_action" "export_terraform_simple" {
 
   body = {
     type           = "ExportResource"
-    resourceName   = "resource${count.index}"
+    resourceName   = "resource_${each.key}"
     fullProperties = false # we want as close to valid tf as possible
     targetProvider = var.target_provider
     maskSensitive  = var.mask_sensitive_arguments
     resourceIds = [
-      local.resources[count.index].id
+      each.value.id
     ]
   }
 
