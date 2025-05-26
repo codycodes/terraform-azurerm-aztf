@@ -74,12 +74,11 @@ locals {
   EOT
 }
 
-
 resource "local_file" "exported_terraform" {
-  for_each = azapi_resource_action.export_terraform
+  for_each = tomap({ for i, resource in azapi_resource_action.export_terraform : i => resource if can(resource.output.properties.configuration) })
 
   filename = "./generated-resources/${each.key}-${local.resource_map[each.key].name}.tf"
-  content  = replace(can(each.value.output.properties.configuration) ? each.value.output.properties.configuration : "", local.tf_block_replace, "")
+  content  = replace(each.value.output.properties.configuration, local.tf_block_replace, "")
 }
 
 # generate single import file for resources
