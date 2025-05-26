@@ -98,8 +98,8 @@ resource "local_file" "exported_terraform" {
 resource "local_file" "exported_terraform_import" {
   filename = "./generated-resources/imported.tf"
   content = join("\n", [
-    for i, v in local.resources : can(values(azapi_resource_action.export_terraform)[i].output.properties.import) ?
-    values(azapi_resource_action.export_terraform)[i].output.properties.import :
+    for i, resource in azapi_resource_action.export_terraform : can(resource.output.properties.import) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds)) ?
+    resource.output.properties.import :
     "# Could not import ${one(values(azapi_resource_action.export_terraform)[i].body.resourceIds)}, please check debug log for details\n"
     ]
   )
