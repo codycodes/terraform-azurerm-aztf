@@ -77,13 +77,13 @@ resource "local_file" "exported_terraform" {
   count = length(local.resources)
 
   filename = "./generated-resources/${count.index}-${local.resources[count.index].name}.tf"
-  content  = replace(azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration, local.tf_block_replace, "")
+  content  = replace(can(azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration) ? azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration : "", local.tf_block_replace, "")
 }
 
 # generate single import file for resources
 resource "local_file" "exported_terraform_import" {
   filename = "./generated-resources/imported.tf"
-  content  = join("\n", [for i, v in local.resources : azapi_resource_action.export_terraform_simple[i].output.properties.import])
+  content  = join("\n", [for i, v in local.resources : can(azapi_resource_action.export_terraform_simple[i].output.properties.import) ? azapi_resource_action.export_terraform_simple[i].output.properties.import : ""])
 }
 
 resource "local_file" "exported_terraform_debug" {
@@ -92,7 +92,7 @@ resource "local_file" "exported_terraform_debug" {
   filename = "./debug/${count.index}-${local.resources[count.index].name}.txt"
   # values cannot result to null in string templates
   content = <<EOT
-  errors: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.errors == null ? "" : azapi_resource_action.export_terraform_simple[count.index].output.properties.errors}
-  skipped resources: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources == null ? "" : azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources}
+  errors: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.errors == null ? "" : join("\n", azapi_resource_action.export_terraform_simple[count.index].output.properties.errors)}
+  skipped resources: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources == null ? "" : join("\n", azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources)}
   EOT
 }
