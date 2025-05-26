@@ -36,7 +36,7 @@ locals {
 }
 
 # generate terraform for each resource and save to file
-resource "azapi_resource_action" "export_terraform_simple" {
+resource "azapi_resource_action" "export_terraform" {
   for_each = local.resource_map
 
   type        = "Microsoft.AzureTerraform@2023-07-01-preview"
@@ -74,26 +74,35 @@ locals {
   EOT
 }
 
-resource "local_file" "exported_terraform" {
-  count = length(local.resources)
 
-  filename = "./generated-resources/${count.index}-${local.resources[count.index].name}.tf"
-  content  = replace(can(azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration) ? azapi_resource_action.export_terraform_simple[count.index].output.properties.configuration : "", local.tf_block_replace, "")
+resource "local_file" "exported_terraform" {
+  for_each = azapi_resource_action.export_terraform
+
+  filename = "./generated-resources/${each.key}-${local.resource_map[each.key].name}.tf"
+  content  = replace(can(each.value.output.properties.configuration) ? each.value.output.properties.configuration : "", local.tf_block_replace, "")
 }
 
 # generate single import file for resources
 resource "local_file" "exported_terraform_import" {
   filename = "./generated-resources/imported.tf"
-  content  = join("\n", [for i, v in local.resources : can(azapi_resource_action.export_terraform_simple[i].output.properties.import) ? azapi_resource_action.export_terraform_simple[i].output.properties.import : ""])
+  content  = join("\n", [for i, v in local.resources : can(values(azapi_resource_action.export_terraform)[i].output.properties.import) ? values(azapi_resource_action.export_terraform)[i].output.properties.import : ""])
+}
+
+# generate debug info (if applicable)
+locals {
+  debug_resources = [
+    for i, resource in azapi_resource_action.export_terraform :
+    {
+      name              = local.resource_map[i].name
+      errors            = resource.output.properties.errors,
+      skipped_resources = resource.output.properties.skippedResources,
+    } if resource.output.properties.errors != null || resource.output.properties.skippedResources != null
+  ]
 }
 
 resource "local_file" "exported_terraform_debug" {
-  count = length(local.resources)
+  count = length(local.debug_resources) >= 1 ? 1 : 0
 
-  filename = "./debug/${count.index}-${local.resources[count.index].name}.txt"
-  # values cannot result to null in string templates
-  content = <<EOT
-  errors: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.errors == null ? "" : join("\n", azapi_resource_action.export_terraform_simple[count.index].output.properties.errors)}
-  skipped resources: ${azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources == null ? "" : join("\n", azapi_resource_action.export_terraform_simple[count.index].output.properties.skippedResources)}
-  EOT
+  filename = "./debugExportTerraform.txt"
+  content  = yamlencode(local.debug_resources)
 }
