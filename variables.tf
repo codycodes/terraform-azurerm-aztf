@@ -15,6 +15,12 @@ variable "resource_ids_to_skip" {
   default     = []
 }
 
+variable "create_next_steps" {
+  type        = bool
+  description = "Should a nextSteps.md document be generated to instruct the maintainer after resources have been generated?"
+  default     = true
+}
+
 # the following are opinionated variables for the module that can be overriddencheck
 variable "mask_sensitive_arguments" {
   type        = bool
