@@ -100,7 +100,7 @@ resource "local_file" "exported_terraform_import" {
   content = join("\n", [
     for i, resource in azapi_resource_action.export_terraform : can(resource.output.properties.import) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds)) ?
     resource.output.properties.import :
-    "# Could not import ${one(values(azapi_resource_action.export_terraform)[i].body.resourceIds)}, please check debug log for details\n"
+    "# Could not import ${one(values(azapi_resource_action.export_terraform)[i].body.resourceIds)}, please check debug log or state file for any details\n"
     ]
   )
 }
