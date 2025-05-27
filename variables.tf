@@ -15,6 +15,12 @@ variable "resource_ids_to_skip" {
   default     = []
 }
 
+variable "generated_resources_directory" {
+  type        = string
+  description = "The directory to use for storing generated configuration. To use the root modules' directory, set this value to ./"
+  default     = "./generated-resources"
+}
+
 variable "create_next_steps" {
   type        = bool
   description = "Should a nextSteps.md document be generated to instruct the maintainer after resources have been generated?"

@@ -89,7 +89,7 @@ resource "local_file" "exported_terraform" {
     if can(resource.output.properties.configuration) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds))
   }
 
-  filename = "./generated-resources/${each.key}-${local.resource_map[each.key].name}.tf"
+  filename = "${var.generated_resources_directory}/${each.key}-${local.resource_map[each.key].name}.tf"
   content  = replace(each.value.output.properties.configuration, local.tf_block_replace, "")
 
   lifecycle {
@@ -100,7 +100,7 @@ resource "local_file" "exported_terraform" {
 
 # generate single import file for resources
 resource "local_file" "exported_terraform_import" {
-  filename = "./generated-resources/imported.tf"
+  filename = "${var.generated_resources_directory}/imported.tf"
   content = join("\n", [
     for i, resource in azapi_resource_action.export_terraform : can(resource.output.properties.import) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds)) ?
     resource.output.properties.import :
