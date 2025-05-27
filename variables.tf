@@ -37,3 +37,9 @@ variable "target_provider" {
     error_message = "The target_provider only supports azurerm or azapi"
   }
 }
+
+variable "first_run_resources_fetched" {
+  type        = bool
+  description = "Workaround to short-circuit apply-time dependencies. The first run should have this set to 'false' with subsequent runs set to 'true'"
+  default     = false
+}

@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">=1.12" # currently required min version for short-circuit workaround
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -31,8 +32,13 @@ resource "local_file" "azure_resources" {
 }
 
 locals {
-  resources    = yamldecode(local_file.azure_resources.content)
-  resource_map = tomap({ for i, v in local.resources : i => v })
+  resource_map = !var.first_run_resources_fetched ? {} : {
+    for i, resource in azapi_resource_action.fetch_resources.output.data :
+    i => {
+      name = resource.name
+      id   = resource.id
+    }
+  }
 }
 
 # generate terraform for each resource and save to file
