@@ -13,4 +13,6 @@ provider "azurerm" {
   resource_providers_to_register  = ["Microsoft.AzureTerraform"] # this provider needs to be registered for exporting resources as Terraform!
   features {}
 }
+
+provider "azapi" {}
 ```
