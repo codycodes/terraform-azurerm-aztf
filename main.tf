@@ -84,12 +84,10 @@ locals {
 #       using a removed block with destroy set to false
 #       please track the following issue for updates: https://github.com/hashicorp/terraform-provider-local/issues/262
 resource "local_file" "exported_terraform" {
-  for_each = tomap(
-    {
-      for i, resource in azapi_resource_action.export_terraform : i => resource
-      if can(resource.output.properties.configuration) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds))
-    }
-  )
+  for_each = !var.second_run_resources_generated ? {} : {
+    for i, resource in azapi_resource_action.export_terraform : i => resource
+    if can(resource.output.properties.configuration) && !contains(var.resource_ids_to_skip, one(resource.body.resourceIds))
+  }
 
   filename = "./generated-resources/${each.key}-${local.resource_map[each.key].name}.tf"
   content  = replace(each.value.output.properties.configuration, local.tf_block_replace, "")
@@ -113,7 +111,7 @@ resource "local_file" "exported_terraform_import" {
 
 # generate debug info (if applicable)
 locals {
-  debug_resources = [
+  debug_resources = !var.second_run_resources_generated ? [] : [
     for i, resource in azapi_resource_action.export_terraform :
     {
       name              = local.resource_map[i].name

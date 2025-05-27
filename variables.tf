@@ -38,8 +38,17 @@ variable "target_provider" {
   }
 }
 
+# These are workaround variables that allow us to handle dynamic collections of data only known at apply time.
+# For Terraform to successfully plan further stages, it needs to have fetched these values into state first
 variable "first_run_resources_fetched" {
   type        = bool
   description = "Workaround to short-circuit apply-time dependencies. The first run should have this set to 'false' with subsequent runs set to 'true'"
   default     = false
 }
+variable "second_run_resources_generated" {
+  type        = bool
+  description = "Workaround to short-circuit apply-time dependencies. The first & second runs should have this set to 'false' with subsequent runs set to 'true'"
+  default     = false
+}
+
+
