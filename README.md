@@ -2,6 +2,31 @@
 
 Fetch ClickOps Resources from an Azure Subscription and Import Directly to Terraform - 100% Terraform!
 
+## Why 🤔
+
+ClickOps & IaC are like yin-yang - one inherently can't exist without the other. When you have a bunch of Azure resources that need to be brought into IaC, this module can help!
+
+While other methods exist, namely [`aztfexport`](https://github.com/Azure/aztfexport) and now the [Azure Portal](https://techcommunity.microsoft.com/blog/azuretoolsblog/announcing-public-preview-of-terraform-export-from-the-azure-portal/4409889), there are a couple downsides, including:
+
+* Requires installing and managing another tool
+* Portal only for a single resource that does not provide options of the REST API
+
+Whereas this module allows you to import all resources in your subscription, all within Terraform!
+
+## Features ✨
+
+* **Fetch all resources from your subscription, and attempts to generate config for each to be directly manageable in Terraform thereafter**
+  * Generates `import` blocks under the imported.tf file
+  * Creates an easy mapping of resources to trace (each resource gets its own file)
+  * Any generated configuration issues are added to a log file
+* Uses the official `Microsoft.AzureTerraform` provider and REST API endpoint (same as `aztfexport` and Azure Portal!)
+  * Supports `azurerm` and `azapi` providers for exported config
+  * Automatically names resources following the Terraform resource naming conventions (lowercase underscores ftw!)
+  * Provides helpful options not currently found in the Azure Portal, like the ability to control, `var.mask_sensitive_arguments`
+* Allows you to specify resources you *don't* want to generate configuration for using `var.resource_ids_to_skip`
+* Customizable directory to store generated resources in (could be a separate workspace)
+* Helpful `nextSteps.md` sharing what you may need to do next to get the resources fully imported into your Terraform state (& you can turn this off if you want!)
+
 ## Setup ⚡
 
 ### Root Module Configuration 🔝
